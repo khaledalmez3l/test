@@ -1,5 +1,5 @@
 // Bump the version when app files change so phones pick up the update
-const CACHE = "fitness-tracker-v6";
+const CACHE = "fitness-tracker-v7";
 const FILES = [
   "./",
   "index.html",
@@ -8,9 +8,9 @@ const FILES = [
   "barcode.js",
   "progress.js",
   "manifest.json",
-  "icons/icon-180.png",
-  "icons/icon-192.png",
-  "icons/icon-512.png",
+  "icons/dumbbell-180.png",
+  "icons/dumbbell-192.png",
+  "icons/dumbbell-512.png",
 ];
 
 self.addEventListener("install", e => {
