@@ -1,5 +1,5 @@
 // Bump the version when app files change so phones pick up the update
-const CACHE = "fitness-tracker-v8";
+const CACHE = "fitness-tracker-v9";
 const FILES = [
   "./",
   "index.html",
@@ -30,8 +30,11 @@ self.addEventListener("activate", e => {
 // Network first so updates show up when online; fall back to cache offline
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  // Revalidate our own files on every load so updates show up right away,
+  // instead of waiting out GitHub Pages' 10-minute browser cache
+  const sameOrigin = new URL(e.request.url).origin === self.location.origin;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, sameOrigin ? { cache: "no-cache" } : undefined)
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

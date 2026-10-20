@@ -857,7 +857,21 @@ window.addEventListener("DOMContentLoaded", () => showTab(["today", "progress", 
 
 // Offline support / installable app
 if ("serviceWorker" in navigator) {
+  // When a new version takes over, reload once so you see it immediately
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").then(reg => {
+      // The home-screen app often resumes instead of restarting, so check for updates then too
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") reg.update().catch(() => {});
+      });
+    }).catch(() => {});
   });
 }
