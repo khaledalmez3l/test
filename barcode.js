@@ -131,9 +131,13 @@ async function lookup(code) {
       setStatus(`Found “${name}”, but it has no calorie information. Enter the calories by hand.`, true);
       return;
     }
+    const per100 = k => (n[k] == null || n[k] === "" ? null : Number(n[k]));
     product = {
       name,
       kcalPer100: Number(kcalPer100),
+      proteinPer100: per100("proteins_100g"),
+      carbsPer100: per100("carbohydrates_100g"),
+      fatPer100: per100("fat_100g"),
       serving: Number(p.serving_quantity) || null,
       servingLabel: p.serving_size || "",
       packageSize: Number(p.product_quantity) || null,
@@ -148,6 +152,12 @@ async function lookup(code) {
   }
 }
 
+function macroLine(p) {
+  const parts = [["P", p.proteinPer100], ["C", p.carbsPer100], ["F", p.fatPer100]]
+    .filter(([, v]) => v != null).map(([k, v]) => `${k} ${Math.round(v * 10) / 10}g`);
+  return parts.length ? ` · ${parts.join(" · ")}` : "";
+}
+
 function showProduct() {
   const p = product;
   const presets = [];
@@ -158,7 +168,7 @@ function showProduct() {
   productEl.hidden = false;
   productEl.innerHTML = `
     <div class="title">${escapeHtml(p.name)}</div>
-    <div class="meta">${Math.round(p.kcalPer100)} kcal per 100 ${p.unit}</div>
+    <div class="meta">${Math.round(p.kcalPer100)} kcal per 100 ${p.unit}${macroLine(p)}</div>
     <div class="preset-row">
       ${presets.map(([label, amt]) => `<button type="button" class="text-btn preset" data-amount="${amt}">${escapeHtml(label)}</button>`).join("")}
     </div>
@@ -200,6 +210,10 @@ productEl.addEventListener("click", e => {
   } else if (e.target.id === "barcodeUse") {
     form.name.value = `${product.name} (${amountEaten()} ${product.unit})`;
     form.calories.value = updateTotal();
+    const scale = amountEaten() / 100;
+    [["protein", "proteinPer100"], ["carbs", "carbsPer100"], ["fat", "fatPer100"]].forEach(([field, key]) => {
+      form[field].value = product[key] == null ? "" : Math.round(product[key] * scale * 10) / 10;
+    });
     dialog.close();
   }
 });

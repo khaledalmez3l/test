@@ -22,9 +22,12 @@ const SCHEMA = {
       },
     },
     total_calories: { type: "integer" },
+    protein_g: { type: "integer", description: "Total protein in grams" },
+    carbs_g: { type: "integer", description: "Total carbohydrates in grams" },
+    fat_g: { type: "integer", description: "Total fat in grams" },
     is_food: { type: "boolean", description: "false if the photo does not show food or drink" },
   },
-  required: ["name", "items", "total_calories", "is_food"],
+  required: ["name", "items", "total_calories", "protein_g", "carbs_g", "fat_g", "is_food"],
   additionalProperties: false,
 };
 
@@ -33,8 +36,8 @@ const SYSTEM_PROMPT =
   "Identify each food or drink visible, estimate its portion size from visual cues " +
   "(plate size, utensils, hands, packaging), and give a realistic calorie estimate for each, " +
   "including likely hidden calories such as cooking oil, butter, dressings and sauces. " +
-  "Round calories to the nearest 10. If the photo shows no food or drink, set is_food to false " +
-  "and return an empty items list with total_calories 0.";
+  "Round calories to the nearest 10 and also estimate total protein, carbs and fat in grams. If the photo shows no food or drink, set is_food to false " +
+  "and return an empty items list with zero totals.";
 
 const form = document.getElementById("mealForm");
 const photoInput = document.getElementById("photoInput");
@@ -126,7 +129,7 @@ async function estimateCalories(base64, apiKey) {
 
 function friendlyError(err) {
   const status = err && err.status;
-  if (status === 401) return "Your API key was rejected. Check it in “Photo estimates” settings below.";
+  if (status === 401) return "Your API key was rejected. Check it under Settings → Photo estimates.";
   if (status === 429) return "Too many requests right now. Wait a moment and try again.";
   if (status === 400 && /credit/i.test(err.message)) return "Your Anthropic account is out of credits.";
   if (!navigator.onLine) return "You're offline. Photo estimates need an internet connection.";
@@ -141,8 +144,8 @@ photoInput.addEventListener("change", async () => {
   const apiKey = getKey();
   if (!apiKey) {
     result.hidden = false;
-    result.innerHTML = `<p class="photo-error">Add your Anthropic API key in “Photo estimates” settings below first.</p>`;
-    document.getElementById("apiKeySettings").open = true;
+    result.innerHTML = `<p class="photo-error">Add your Anthropic API key under Settings → Photo estimates first.</p>`;
+    document.querySelector('.tabbar [data-tab="settings"]').click();
     keyInput.focus();
     return;
   }
@@ -166,10 +169,14 @@ photoInput.addEventListener("change", async () => {
 
     form.name.value = est.name;
     form.calories.value = est.total_calories;
+    form.protein.value = est.protein_g;
+    form.carbs.value = est.carbs_g;
+    form.fat.value = est.fat_g;
     result.innerHTML = `
       <img class="photo-thumb" src="${dataUrl}" alt="">
       <div class="photo-breakdown">
         <div class="title">${escapeHtml(est.name)} · ~${est.total_calories} kcal</div>
+        <div class="meta">Protein ${est.protein_g}g · Carbs ${est.carbs_g}g · Fat ${est.fat_g}g</div>
         <ul>${est.items.map(i =>
           `<li>${escapeHtml(i.food)} <span class="meta">(${escapeHtml(i.portion)})</span> — ${i.calories} kcal</li>`
         ).join("")}</ul>

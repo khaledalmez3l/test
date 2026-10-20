@@ -26,7 +26,7 @@
       <h1>Weekly Fitness Tracker</h1>
       <button id="themeBtn" class="icon-btn theme-btn" aria-label="Change theme"></button>
     </div>
-    <div class="week-nav">
+    <div class="week-nav" data-only-tab="today">
       <button id="prevWeek" class="icon-btn" aria-label="Previous week">&#8249;</button>
       <span id="weekLabel"></span>
       <button id="nextWeek" class="icon-btn" aria-label="Next week">&#8250;</button>
@@ -35,107 +35,250 @@
   </header>
 
   <main>
-    <!-- Weekly summary -->
-    <section class="card summary">
-      <div class="stat">
-        <span class="stat-label">Calories eaten</span>
-        <span class="stat-value" id="sumEaten">0</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Calories burned</span>
-        <span class="stat-value" id="sumBurned">0</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Workout minutes</span>
-        <span class="stat-value" id="sumMinutes">0</span>
-      </div>
-      <div class="stat">
-        <span class="stat-label">Workouts</span>
-        <span class="stat-value" id="sumWorkouts">0</span>
-      </div>
-      <div class="stat goal">
-        <label class="stat-label" for="goalInput">Daily calorie goal</label>
-        <input type="number" id="goalInput" min="0" step="50">
-      </div>
-    </section>
-
-    <!-- Week chart / day picker -->
-    <section class="card">
-      <div class="card-head">
-        <h2>This week</h2>
-        <div class="legend">
-          <span><i class="swatch eaten"></i>Eaten</span>
-          <span><i class="swatch burned"></i>Burned</span>
-          <span><i class="swatch goal-line"></i>Goal</span>
+    <!-- ================= TODAY ================= -->
+    <div class="tab" id="tab-today">
+      <!-- Weekly summary -->
+      <section class="card summary">
+        <div class="stat">
+          <span class="stat-label">Calories eaten</span>
+          <span class="stat-value" id="sumEaten">0</span>
         </div>
-      </div>
-      <div class="week-grid" id="weekGrid"></div>
-    </section>
+        <div class="stat">
+          <span class="stat-label">Calories burned</span>
+          <span class="stat-value" id="sumBurned">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Workout minutes</span>
+          <span class="stat-value" id="sumMinutes">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Streak</span>
+          <span class="stat-value" id="streakValue">0</span>
+          <span class="meta" id="streakNote"></span>
+        </div>
+        <div class="stat goal-progress">
+          <span class="stat-label">Workouts this week</span>
+          <span class="stat-value"><span id="sumWorkouts">0</span><small id="workoutGoalLabel"></small></span>
+          <div class="progress" role="progressbar" aria-label="Weekly workout goal">
+            <div class="progress-fill" id="workoutGoalBar"></div>
+          </div>
+        </div>
+      </section>
 
-    <!-- Selected day -->
-    <section class="day-panels">
-      <div class="card">
+      <!-- Week chart / day picker -->
+      <section class="card">
         <div class="card-head">
-          <h2>Workouts · <span class="day-name"></span></h2>
+          <h2>This week</h2>
+          <div class="legend">
+            <span><i class="swatch eaten"></i>Eaten</span>
+            <span><i class="swatch burned"></i>Burned</span>
+            <span><i class="swatch goal-line"></i>Goal</span>
+          </div>
         </div>
-        <form id="workoutForm" class="entry-form">
-          <input type="text" name="name" placeholder="Exercise (e.g. Running)" required>
-          <select name="type">
-            <option>Cardio</option>
-            <option>Strength</option>
-            <option>Flexibility</option>
-            <option>Sports</option>
-            <option>Other</option>
-          </select>
-          <input type="number" name="minutes" placeholder="Minutes" min="0" required>
-          <input type="number" name="calories" placeholder="Calories burned" min="0">
-          <button type="submit" class="primary-btn">Add</button>
-        </form>
-        <ul class="entry-list" id="workoutList"></ul>
-      </div>
+        <div class="week-grid" id="weekGrid"></div>
+      </section>
 
-      <div class="card">
-        <div class="card-head">
-          <h2>Meals · <span class="day-name"></span></h2>
-        </div>
-        <form id="mealForm" class="entry-form">
-          <label class="photo-btn" title="Estimate calories from a photo">
-            <input type="file" id="photoInput" accept="image/*" hidden>
-            <span aria-hidden="true">📷</span><span class="photo-btn-text">Photo</span>
-          </label>
-          <button type="button" class="photo-btn" id="barcodeBtn" title="Scan a barcode">
-            <span aria-hidden="true">▥</span>Barcode
-          </button>
-          <input type="text" name="name" placeholder="Food (e.g. Oatmeal)" required>
-          <select name="meal">
-            <option>Breakfast</option>
-            <option>Lunch</option>
-            <option>Dinner</option>
-            <option>Snack</option>
-          </select>
-          <input type="number" name="calories" placeholder="Calories" min="0" required>
-          <button type="submit" class="primary-btn">Add</button>
-        </form>
-        <div class="photo-result" id="photoResult" hidden></div>
-        <ul class="entry-list" id="mealList"></ul>
-        <div class="day-total" id="dayTotal"></div>
-
-        <details class="settings" id="apiKeySettings">
-          <summary>Photo estimates settings</summary>
-          <p class="meta">
-            Photo calorie estimates use Claude and need your own Anthropic API key
-            (get one at console.anthropic.com). The key stays on this device only.
-          </p>
-          <form id="apiKeyForm" class="entry-form">
-            <input type="password" id="apiKeyInput" placeholder="sk-ant-…" autocomplete="off" required>
-            <button type="submit" class="primary-btn">Save</button>
-            <button type="button" id="apiKeyClear" class="text-btn">Remove</button>
+      <!-- Selected day -->
+      <section class="day-panels">
+        <div class="card">
+          <div class="card-head">
+            <h2>Workouts · <span class="day-name"></span></h2>
+            <button type="button" class="text-btn small-btn" data-copy="workouts">Copy previous day</button>
+          </div>
+          <form id="workoutForm" class="entry-form">
+            <input type="text" name="name" placeholder="Exercise (e.g. Running)" list="exerciseList" autocomplete="off" required>
+            <select name="type">
+              <option>Cardio</option>
+              <option>Strength</option>
+              <option>Flexibility</option>
+              <option>Sports</option>
+              <option>Other</option>
+            </select>
+            <input type="number" name="minutes" placeholder="Minutes" min="0" required>
+            <input type="number" name="calories" placeholder="Calories burned" min="0">
+            <button type="submit" class="primary-btn">Add</button>
+            <button type="button" class="text-btn cancel-edit" hidden>Cancel</button>
           </form>
-          <p class="meta" id="apiKeyStatus"></p>
-        </details>
+          <p class="meta form-hint" id="burnHint"></p>
+          <datalist id="exerciseList"></datalist>
+          <div class="quick" id="quickWorkouts"></div>
+          <ul class="entry-list" id="workoutList"></ul>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Meals · <span class="day-name"></span></h2>
+            <button type="button" class="text-btn small-btn" data-copy="meals">Copy previous day</button>
+          </div>
+          <form id="mealForm" class="entry-form">
+            <label class="photo-btn" title="Estimate calories from a photo">
+              <input type="file" id="photoInput" accept="image/*" hidden>
+              <span aria-hidden="true">📷</span><span class="photo-btn-text">Photo</span>
+            </label>
+            <button type="button" class="photo-btn" id="barcodeBtn" title="Scan a barcode">
+              <span aria-hidden="true">▥</span>Barcode
+            </button>
+            <input type="text" name="name" placeholder="Food (e.g. Oatmeal)" required>
+            <select name="meal">
+              <option>Breakfast</option>
+              <option>Lunch</option>
+              <option>Dinner</option>
+              <option>Snack</option>
+            </select>
+            <input type="number" name="calories" placeholder="Calories" min="0" required>
+            <div class="macro-row">
+              <input type="number" name="protein" placeholder="Protein g" min="0" step="any">
+              <input type="number" name="carbs" placeholder="Carbs g" min="0" step="any">
+              <input type="number" name="fat" placeholder="Fat g" min="0" step="any">
+            </div>
+            <button type="submit" class="primary-btn">Add</button>
+            <button type="button" class="text-btn cancel-edit" hidden>Cancel</button>
+          </form>
+          <div class="photo-result" id="photoResult" hidden></div>
+          <div class="quick" id="quickMeals"></div>
+          <ul class="entry-list" id="mealList"></ul>
+          <div class="day-total" id="dayTotal"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Water · <span class="day-name"></span></h2>
+          </div>
+          <div class="water-row">
+            <button type="button" class="icon-btn" id="waterMinus" aria-label="Remove a glass">−</button>
+            <div class="glasses" id="glasses"></div>
+            <button type="button" class="icon-btn" id="waterPlus" aria-label="Add a glass">+</button>
+          </div>
+          <p class="meta" id="waterLabel"></p>
+
+          <div class="card-head weight-head">
+            <h2>Weight</h2>
+          </div>
+          <form id="weightForm" class="entry-form">
+            <input type="number" id="weightInput" min="0" step="0.1" placeholder="Weight" required>
+            <span class="unit-label" id="weightUnitLabel">kg</span>
+            <button type="submit" class="primary-btn">Save</button>
+            <button type="button" class="text-btn" id="weightClear" hidden>Remove</button>
+          </form>
+          <p class="meta" id="weightNote"></p>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= PROGRESS ================= -->
+    <div class="tab" id="tab-progress" hidden>
+      <div class="range-row" role="group" aria-label="Time range">
+        <button type="button" class="text-btn range-btn" data-weeks="4">4 weeks</button>
+        <button type="button" class="text-btn range-btn" data-weeks="12">12 weeks</button>
+        <button type="button" class="text-btn range-btn" data-weeks="26">6 months</button>
       </div>
-    </section>
+
+      <section class="card summary" id="progressStats"></section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Average daily calories</h2>
+          <div class="legend">
+            <span><i class="swatch eaten"></i>Eaten</span>
+            <span><i class="swatch burned"></i>Burned</span>
+            <span><i class="swatch goal-line"></i>Goal</span>
+          </div>
+        </div>
+        <p class="meta chart-sub">Per week, averaged over the days you logged something.</p>
+        <div class="chart" id="calChart"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Workout minutes per week</h2></div>
+        <div class="chart" id="minChart"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Weight</h2></div>
+        <div class="chart" id="weightChart"></div>
+      </section>
+
+      <details class="card table-view">
+        <summary>Show as table</summary>
+        <div class="table-scroll" id="progressTable"></div>
+      </details>
+    </div>
+
+    <!-- ================= SETTINGS ================= -->
+    <div class="tab" id="tab-settings" hidden>
+      <section class="card">
+        <h2>Goals</h2>
+        <div class="settings-grid">
+          <label>Daily calorie goal
+            <input type="number" id="goalInput" min="0" step="50">
+          </label>
+          <label>Workouts per week
+            <input type="number" id="workoutGoalInput" min="0" max="14" step="1">
+          </label>
+          <label>Glasses of water per day
+            <input type="number" id="waterGoalInput" min="1" max="30" step="1">
+          </label>
+          <label>Weight unit
+            <select id="unitSelect">
+              <option value="kg">kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Daily reminder</h2>
+        <p class="meta">
+          Adds a repeating daily event with an alert to your iPhone Calendar, so you get a
+          notification to log your day. Tap the link in the event to open the app.
+        </p>
+        <div class="entry-form">
+          <input type="time" id="reminderTime" value="20:00">
+          <button type="button" class="primary-btn" id="reminderBtn">Add to Calendar</button>
+        </div>
+        <p class="meta small">To stop it later, delete the event in the Calendar app.</p>
+      </section>
+
+      <section class="card">
+        <h2>Backup</h2>
+        <p class="meta">
+          Your data is stored only on this phone. Export a backup now and then (save it to
+          Files or iCloud Drive) so you can restore it after reinstalling or on a new phone.
+        </p>
+        <div class="entry-form">
+          <button type="button" class="primary-btn" id="exportBtn">Export backup</button>
+          <label class="text-btn photo-label">
+            <input type="file" id="importInput" accept=".json,application/json" hidden>Import backup
+          </label>
+        </div>
+        <p class="meta" id="backupStatus"></p>
+      </section>
+
+      <section class="card" id="apiKeySettings">
+        <h2>Photo estimates</h2>
+        <p class="meta">
+          Photo calorie estimates use Claude and need your own Anthropic API key
+          (get one at console.anthropic.com). The key stays on this device only and is not
+          included in backups.
+        </p>
+        <form id="apiKeyForm" class="entry-form">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-…" autocomplete="off" required>
+          <button type="submit" class="primary-btn">Save</button>
+          <button type="button" id="apiKeyClear" class="text-btn">Remove</button>
+        </form>
+        <p class="meta" id="apiKeyStatus"></p>
+      </section>
+    </div>
   </main>
+
+  <nav class="tabbar" aria-label="Sections">
+    <button type="button" data-tab="today" class="active"><span aria-hidden="true">📅</span>Today</button>
+    <button type="button" data-tab="progress"><span aria-hidden="true">📈</span>Progress</button>
+    <button type="button" data-tab="settings"><span aria-hidden="true">⚙️</span>Settings</button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <dialog id="barcodeDialog" class="barcode-dialog">
     <div class="card-head">
@@ -158,9 +301,8 @@
     <p class="meta small">Product data from Open Food Facts (free).</p>
   </dialog>
 
-  <footer>Data is saved in your browser (localStorage).</footer>
-
   <script src="script.js"></script>
+  <script src="progress.js"></script>
   <script type="module" src="photo.js"></script>
   <script type="module" src="barcode.js"></script>
 </body>
