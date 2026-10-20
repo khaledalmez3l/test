@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Fitness Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Weekly Fitness Tracker</h1>
+    <div class="week-nav">
+      <button id="prevWeek" class="icon-btn" aria-label="Previous week">&#8249;</button>
+      <span id="weekLabel"></span>
+      <button id="nextWeek" class="icon-btn" aria-label="Next week">&#8250;</button>
+      <button id="thisWeek" class="text-btn">This week</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Weekly summary -->
+    <section class="card summary">
+      <div class="stat">
+        <span class="stat-label">Calories eaten</span>
+        <span class="stat-value" id="sumEaten">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Calories burned</span>
+        <span class="stat-value" id="sumBurned">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Workout minutes</span>
+        <span class="stat-value" id="sumMinutes">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Workouts</span>
+        <span class="stat-value" id="sumWorkouts">0</span>
+      </div>
+      <div class="stat goal">
+        <label class="stat-label" for="goalInput">Daily calorie goal</label>
+        <input type="number" id="goalInput" min="0" step="50">
+      </div>
+    </section>
+
+    <!-- Week chart / day picker -->
+    <section class="card">
+      <div class="card-head">
+        <h2>This week</h2>
+        <div class="legend">
+          <span><i class="swatch eaten"></i>Eaten</span>
+          <span><i class="swatch burned"></i>Burned</span>
+          <span><i class="swatch goal-line"></i>Goal</span>
+        </div>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+    </section>
+
+    <!-- Selected day -->
+    <section class="day-panels">
+      <div class="card">
+        <div class="card-head">
+          <h2>Workouts · <span class="day-name"></span></h2>
+        </div>
+        <form id="workoutForm" class="entry-form">
+          <input type="text" name="name" placeholder="Exercise (e.g. Running)" required>
+          <select name="type">
+            <option>Cardio</option>
+            <option>Strength</option>
+            <option>Flexibility</option>
+            <option>Sports</option>
+            <option>Other</option>
+          </select>
+          <input type="number" name="minutes" placeholder="Minutes" min="0" required>
+          <input type="number" name="calories" placeholder="Calories burned" min="0">
+          <button type="submit" class="primary-btn">Add</button>
+        </form>
+        <ul class="entry-list" id="workoutList"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Meals · <span class="day-name"></span></h2>
+        </div>
+        <form id="mealForm" class="entry-form">
+          <input type="text" name="name" placeholder="Food (e.g. Oatmeal)" required>
+          <select name="meal">
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Snack</option>
+          </select>
+          <input type="number" name="calories" placeholder="Calories" min="0" required>
+          <button type="submit" class="primary-btn">Add</button>
+        </form>
+        <ul class="entry-list" id="mealList"></ul>
+        <div class="day-total" id="dayTotal"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>Data is saved in your browser (localStorage).</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
