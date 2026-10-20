@@ -30,6 +30,10 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.4;
+  /* Keep content clear of the iPhone notch and home bar */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Header */

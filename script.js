@@ -235,3 +235,10 @@ document.getElementById("thisWeek").addEventListener("click", () => {
 });
 
 render();
+
+// Offline support / installable app
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
