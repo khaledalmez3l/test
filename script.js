@@ -758,6 +758,8 @@ themeBtn.addEventListener("click", () => {
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => applyTheme(theme));
 
 // ---- Start ----
+// The photo calorie estimate feature was removed; delete any API key it saved
+try { localStorage.removeItem("fitnessTracker.apiKey"); } catch (e) { /* ignore */ }
 applyTheme(theme);
 render();
 let savedTab = "today";

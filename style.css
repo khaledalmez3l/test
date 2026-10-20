@@ -280,7 +280,7 @@ footer {
   .day-panels { grid-template-columns: 1fr; }
 }
 
-/* Photo calorie estimate */
+/* Meal entry buttons */
 .photo-btn {
   display: inline-flex;
   align-items: center;
@@ -295,45 +295,8 @@ footer {
 }
 .photo-btn:hover { background: var(--bg); }
 
-.photo-result {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 12px;
-  margin-bottom: 14px;
-  border-radius: 10px;
-  background: var(--bg);
-}
-.photo-result[hidden] { display: none; }
-.photo-result p { margin: 0; }
-.photo-thumb {
-  width: 84px;
-  height: 84px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-.photo-breakdown { flex: 1; min-width: 0; }
-.photo-breakdown .title { font-weight: 600; margin-bottom: 4px; }
-.photo-breakdown ul { margin: 0 0 6px; padding-left: 18px; font-size: 0.9rem; }
-.photo-status { display: flex; align-items: center; gap: 8px; color: var(--muted); }
 .photo-error { color: var(--goal); }
 .meta { color: var(--muted); font-size: 0.85rem; }
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.settings { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
-.settings summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
-.settings .entry-form { margin: 8px 0 4px; }
-.settings input[type="password"] { flex: 2 1 180px; }
 
 /* Barcode scanner */
 button.photo-btn { background: transparent; font: inherit; font-weight: 600; }

@@ -111,10 +111,6 @@
             <button type="button" class="text-btn small-btn" data-copy="meals">Copy previous day</button>
           </div>
           <form id="mealForm" class="entry-form">
-            <label class="photo-btn" title="Estimate calories from a photo">
-              <input type="file" id="photoInput" accept="image/*" hidden>
-              <span aria-hidden="true">📷</span><span class="photo-btn-text">Photo</span>
-            </label>
             <button type="button" class="photo-btn" id="barcodeBtn" title="Scan a barcode">
               <span aria-hidden="true">▥</span>Barcode
             </button>
@@ -134,7 +130,6 @@
             <button type="submit" class="primary-btn">Add</button>
             <button type="button" class="text-btn cancel-edit" hidden>Cancel</button>
           </form>
-          <div class="photo-result" id="photoResult" hidden></div>
           <div class="quick" id="quickMeals"></div>
           <ul class="entry-list" id="mealList"></ul>
           <div class="day-total" id="dayTotal"></div>
@@ -255,20 +250,6 @@
         <p class="meta" id="backupStatus"></p>
       </section>
 
-      <section class="card" id="apiKeySettings">
-        <h2>Photo estimates</h2>
-        <p class="meta">
-          Photo calorie estimates use Claude and need your own Anthropic API key
-          (get one at console.anthropic.com). The key stays on this device only and is not
-          included in backups.
-        </p>
-        <form id="apiKeyForm" class="entry-form">
-          <input type="password" id="apiKeyInput" placeholder="sk-ant-…" autocomplete="off" required>
-          <button type="submit" class="primary-btn">Save</button>
-          <button type="button" id="apiKeyClear" class="text-btn">Remove</button>
-        </form>
-        <p class="meta" id="apiKeyStatus"></p>
-      </section>
     </div>
   </main>
 
@@ -303,7 +284,6 @@
 
   <script src="script.js"></script>
   <script src="progress.js"></script>
-  <script type="module" src="photo.js"></script>
   <script type="module" src="barcode.js"></script>
 </body>
 </html>
