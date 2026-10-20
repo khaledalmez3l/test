@@ -89,6 +89,10 @@
           <h2>Meals · <span class="day-name"></span></h2>
         </div>
         <form id="mealForm" class="entry-form">
+          <label class="photo-btn" title="Estimate calories from a photo">
+            <input type="file" id="photoInput" accept="image/*" hidden>
+            <span aria-hidden="true">📷</span><span class="photo-btn-text">Photo</span>
+          </label>
           <input type="text" name="name" placeholder="Food (e.g. Oatmeal)" required>
           <select name="meal">
             <option>Breakfast</option>
@@ -99,8 +103,23 @@
           <input type="number" name="calories" placeholder="Calories" min="0" required>
           <button type="submit" class="primary-btn">Add</button>
         </form>
+        <div class="photo-result" id="photoResult" hidden></div>
         <ul class="entry-list" id="mealList"></ul>
         <div class="day-total" id="dayTotal"></div>
+
+        <details class="settings" id="apiKeySettings">
+          <summary>Photo estimates settings</summary>
+          <p class="meta">
+            Photo calorie estimates use Claude and need your own Anthropic API key
+            (get one at console.anthropic.com). The key stays on this device only.
+          </p>
+          <form id="apiKeyForm" class="entry-form">
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-…" autocomplete="off" required>
+            <button type="submit" class="primary-btn">Save</button>
+            <button type="button" id="apiKeyClear" class="text-btn">Remove</button>
+          </form>
+          <p class="meta" id="apiKeyStatus"></p>
+        </details>
       </div>
     </section>
   </main>
@@ -108,5 +127,6 @@
   <footer>Data is saved in your browser (localStorage).</footer>
 
   <script src="script.js"></script>
+  <script type="module" src="photo.js"></script>
 </body>
 </html>
