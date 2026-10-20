@@ -314,3 +314,52 @@ footer {
 .settings summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
 .settings .entry-form { margin: 8px 0 4px; }
 .settings input[type="password"] { flex: 2 1 180px; }
+
+/* Barcode scanner */
+button.photo-btn { background: transparent; font: inherit; font-weight: 600; }
+
+.barcode-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--text);
+  padding: 20px;
+}
+.barcode-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+.barcode-dialog .entry-form { margin: 10px 0 0; }
+.barcode-dialog .entry-form input { flex: 1 1 160px; }
+
+.scan-area {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.scan-area[hidden] { display: none; }
+.scan-area video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scan-frame {
+  position: absolute;
+  inset: 30% 12%;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
+}
+
+.barcode-product {
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg);
+}
+.barcode-product[hidden] { display: none; }
+.barcode-product .title { font-weight: 600; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.preset-row .text-btn { height: 30px; font-size: 0.85rem; }
+.amount-row { display: flex; align-items: center; gap: 8px; }
+.amount-row input { width: 90px; }
+.barcode-total { font-size: 1.4rem; font-weight: 700; margin: 10px 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.photo-label { display: inline-flex; align-items: center; cursor: pointer; }
+.meta.small { font-size: 0.75rem; margin-bottom: 0; }

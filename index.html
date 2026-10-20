@@ -93,6 +93,9 @@
             <input type="file" id="photoInput" accept="image/*" hidden>
             <span aria-hidden="true">📷</span><span class="photo-btn-text">Photo</span>
           </label>
+          <button type="button" class="photo-btn" id="barcodeBtn" title="Scan a barcode">
+            <span aria-hidden="true">▥</span>Barcode
+          </button>
           <input type="text" name="name" placeholder="Food (e.g. Oatmeal)" required>
           <select name="meal">
             <option>Breakfast</option>
@@ -124,9 +127,31 @@
     </section>
   </main>
 
+  <dialog id="barcodeDialog" class="barcode-dialog">
+    <div class="card-head">
+      <h2>Scan barcode</h2>
+      <button type="button" class="icon-btn" id="barcodeClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="scan-area" id="scanArea">
+      <video id="barcodeVideo" playsinline muted autoplay></video>
+      <div class="scan-frame"></div>
+    </div>
+    <p class="meta" id="barcodeStatus"></p>
+    <div class="barcode-product" id="barcodeProduct" hidden></div>
+    <form id="barcodeManual" class="entry-form">
+      <input type="text" name="code" inputmode="numeric" pattern="[0-9 ]*" placeholder="Or type the barcode number" required>
+      <button type="submit" class="text-btn">Look up</button>
+      <label class="text-btn photo-label">
+        <input type="file" id="barcodePhoto" accept="image/*" hidden>Photo of barcode
+      </label>
+    </form>
+    <p class="meta small">Product data from Open Food Facts (free).</p>
+  </dialog>
+
   <footer>Data is saved in your browser (localStorage).</footer>
 
   <script src="script.js"></script>
   <script type="module" src="photo.js"></script>
+  <script type="module" src="barcode.js"></script>
 </body>
 </html>
