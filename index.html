@@ -12,10 +12,20 @@
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <script>
+    // Apply the saved theme before the page draws, so it doesn't flash light first
+    try {
+      var t = localStorage.getItem("fitnessTracker.theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <header class="topbar">
-    <h1>Weekly Fitness Tracker</h1>
+    <div class="title-row">
+      <h1>Weekly Fitness Tracker</h1>
+      <button id="themeBtn" class="icon-btn theme-btn" aria-label="Change theme"></button>
+    </div>
     <div class="week-nav">
       <button id="prevWeek" class="icon-btn" aria-label="Previous week">&#8249;</button>
       <span id="weekLabel"></span>

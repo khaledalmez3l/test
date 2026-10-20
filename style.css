@@ -9,18 +9,34 @@
   --burned: #10b981;
   --goal: #ef4444;
   --radius: 14px;
+  color-scheme: light;
 }
 
+/* Dark theme: follows the phone setting ("Auto") unless the in-app toggle picks one */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #11151f;
     --card: #1a202d;
     --text: #e8ecf4;
     --muted: #8d96aa;
     --border: #2a3242;
     --accent: #7b91ff;
+    color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --bg: #11151f;
+  --card: #1a202d;
+  --text: #e8ecf4;
+  --muted: #8d96aa;
+  --border: #2a3242;
+  --accent: #7b91ff;
+  color-scheme: dark;
+}
+
+.title-row { display: flex; align-items: center; gap: 12px; }
+@media (max-width: 640px) { .title-row { width: 100%; justify-content: space-between; } }
+.icon-btn.theme-btn { width: auto; padding: 0 10px; font-size: 0.9rem; white-space: nowrap; }
 
 * { box-sizing: border-box; }
 

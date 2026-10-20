@@ -234,6 +234,35 @@ document.getElementById("thisWeek").addEventListener("click", () => {
   render();
 });
 
+// ---- Theme: Auto (follow phone) → Light → Dark ----
+const THEME_KEY = "fitnessTracker.theme";
+const THEMES = { auto: "◐ Auto", light: "☀️ Light", dark: "🌙 Dark" };
+const themeBtn = document.getElementById("themeBtn");
+const themeColor = document.querySelector('meta[name="theme-color"]');
+
+function applyTheme(theme) {
+  if (theme === "auto") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  themeBtn.textContent = THEMES[theme];
+  themeBtn.setAttribute("aria-label", `Theme: ${theme}. Tap to change.`);
+  themeColor.content = getComputedStyle(document.body).backgroundColor;
+}
+
+let theme = "auto";
+try { theme = localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { /* ignore */ }
+if (!THEMES[theme]) theme = "auto";
+applyTheme(theme);
+
+themeBtn.addEventListener("click", () => {
+  const order = Object.keys(THEMES);
+  theme = order[(order.indexOf(theme) + 1) % order.length];
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* ignore */ }
+  applyTheme(theme);
+});
+
+// Keep the browser bar colour right when the phone switches in Auto mode
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => applyTheme(theme));
+
 render();
 
 // Offline support / installable app
