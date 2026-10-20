@@ -1,5 +1,5 @@
 // Bump the version when app files change so phones pick up the update
-const CACHE = "fitness-tracker-v7";
+const CACHE = "fitness-tracker-v8";
 const FILES = [
   "./",
   "index.html",

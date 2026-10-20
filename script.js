@@ -5,11 +5,12 @@ const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const LB_PER_KG = 2.20462;
 
 // Data shape:
-// { goal, workoutGoal, waterGoal, unit: "kg"|"lb",
+// { goal, workoutGoal, waterGoalL, unit: "kg"|"lb",
 //   days: { "YYYY-MM-DD": { workouts: [{name,type,minutes,calories}],
-//                           meals: [{name,meal,calories,protein?,carbs?,fat?}], water } },
+//                           meals: [{name,meal,calories,protein?,carbs?,fat?}], waterL } },
 //   weights: { "YYYY-MM-DD": kg } }
-const DEFAULTS = { goal: 2000, workoutGoal: 4, waterGoal: 8, unit: "kg" };
+const DEFAULTS = { goal: 2000, workoutGoal: 4, waterGoalL: 2, unit: "kg" };
+const LITERS_PER_GLASS = 0.25; // older versions counted water in glasses
 
 let data = load();
 let weekStart = getMonday(new Date());
@@ -20,6 +21,17 @@ function normalize(saved) {
   const d = Object.assign({}, DEFAULTS, saved);
   d.days = d.days && typeof d.days === "object" ? d.days : {};
   d.weights = d.weights && typeof d.weights === "object" ? d.weights : {};
+  // Convert water logged as glasses (older versions) to liters
+  if (saved && saved.waterGoalL == null && saved.waterGoal != null) {
+    d.waterGoalL = Math.max(0.25, saved.waterGoal * LITERS_PER_GLASS);
+  }
+  delete d.waterGoal;
+  Object.values(d.days).forEach(day => {
+    if (day.water != null) {
+      if (day.waterL == null) day.waterL = day.water * LITERS_PER_GLASS;
+      delete day.water;
+    }
+  });
   return d;
 }
 
@@ -295,13 +307,7 @@ function renderDay() {
 }
 
 function renderWaterWeight() {
-  const water = peekDay(selectedDate).water || 0;
-  const goal = data.waterGoal;
-  const shown = Math.max(goal, water);
-  document.getElementById("glasses").innerHTML = Array.from({ length: shown }, (_, i) =>
-    `<span class="glass ${i < water ? "full" : ""}" aria-hidden="true"></span>`).join("");
-  document.getElementById("waterLabel").textContent =
-    `${water} of ${goal} glasses${water >= goal ? " · goal reached 🎉" : ""}`;
+  renderBottle();
 
   const unitLabel = document.getElementById("weightUnitLabel");
   unitLabel.textContent = data.unit;
@@ -556,15 +562,94 @@ document.querySelector(".day-panels").addEventListener("click", e => {
   if (target) startEdit(target.dataset.list, Number(target.dataset.index));
 });
 
-// ---- Water ----
-function changeWater(delta) {
-  const day = getDay(selectedDate);
-  day.water = Math.max(0, (day.water || 0) + delta);
-  save();
-  renderWaterWeight();
+// ---- Water: liters drunk, shown as a filling bottle ----
+const BOTTLE_BOTTOM = 206; // y of the bottle floor in the SVG
+const BOTTLE_TOP = 62;     // y the water reaches at 100% of the goal
+const formatL = l => `${Math.round(l * 100) / 100} L`;
+
+function renderBottle() {
+  const liters = peekDay(selectedDate).waterL || 0;
+  const goal = data.waterGoalL;
+  const frac = Math.min(1, liters / goal);
+  // Park the wave just below the floor when empty so no sliver shows
+  const y = liters > 0 ? BOTTLE_BOTTOM - frac * (BOTTLE_BOTTOM - BOTTLE_TOP) : BOTTLE_BOTTOM + 10;
+  document.getElementById("waterLevel").style.transform = `translateY(${y}px)`;
+
+  document.getElementById("bottleTicks").innerHTML = [0.25, 0.5, 0.75, 1].map(f => {
+    const ty = BOTTLE_BOTTOM - f * (BOTTLE_BOTTOM - BOTTLE_TOP);
+    return `<line x1="104" x2="112" y1="${ty}" y2="${ty}" class="bottle-tick"/>` +
+      `<text x="116" y="${ty + 4}" class="bottle-tick-label">${formatL(goal * f).replace(" L", "")}</text>`;
+  }).join("");
+
+  document.getElementById("waterAmount").textContent = formatL(liters);
+  document.getElementById("waterGoalShow").textContent = formatL(goal);
+  const pct = Math.round((liters / goal) * 100);
+  const left = goal - liters;
+  document.getElementById("waterLabel").textContent = liters >= goal
+    ? `Goal reached 🎉${liters > goal ? ` · ${formatL(liters - goal)} extra` : ""}`
+    : `${pct}% · ${formatL(left)} to go`;
+  document.getElementById("waterReset").hidden = liters === 0;
+  document.querySelector(".bottle").setAttribute("aria-label", `Water: ${formatL(liters)} of ${formatL(goal)}`);
 }
-document.getElementById("waterPlus").addEventListener("click", () => changeWater(1));
-document.getElementById("waterMinus").addEventListener("click", () => changeWater(-1));
+
+function bubbleUp() {
+  const bottle = document.querySelector(".bottle");
+  bottle.classList.remove("splash");
+  void bottle.getBoundingClientRect(); // restart the animation
+  bottle.classList.add("splash");
+  const layer = document.getElementById("bubbles");
+  for (let i = 0; i < 6; i++) {
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", 30 + Math.random() * 60);
+    c.setAttribute("cy", 196);
+    c.setAttribute("r", 2 + Math.random() * 3);
+    c.setAttribute("class", "bubble");
+    c.style.animationDelay = `${i * 0.08}s`;
+    layer.appendChild(c);
+    setTimeout(() => c.remove(), 1600);
+  }
+}
+
+function addWater(liters) {
+  if (!(liters > 0)) return;
+  const day = getDay(selectedDate);
+  const before = day.waterL || 0;
+  day.waterL = Math.round((before + liters) * 1000) / 1000;
+  save();
+  renderBottle();
+  bubbleUp();
+  toast(`Added ${formatL(liters)} of water`, {
+    label: "Undo",
+    run: () => { getDay(selectedDate).waterL = before; save(); renderBottle(); },
+  });
+}
+
+document.getElementById("waterForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("waterInput");
+  const value = Number(String(input.value).replace(",", "."));
+  if (!(value > 0)) return;
+  addWater(Math.min(value, 10));
+  input.value = "";
+  input.blur();
+});
+
+document.querySelectorAll("[data-water]").forEach(btn =>
+  btn.addEventListener("click", () => addWater(Number(btn.dataset.water))));
+
+document.querySelector(".bottle").addEventListener("click", () => document.getElementById("waterInput").focus());
+
+document.getElementById("waterReset").addEventListener("click", () => {
+  const day = getDay(selectedDate);
+  const before = day.waterL || 0;
+  day.waterL = 0;
+  save();
+  renderBottle();
+  toast("Water reset for this day", {
+    label: "Undo",
+    run: () => { getDay(selectedDate).waterL = before; save(); renderBottle(); },
+  });
+});
 
 // ---- Weight ----
 document.getElementById("weightForm").addEventListener("submit", e => {
@@ -617,7 +702,7 @@ document.querySelectorAll(".tabbar button").forEach(b =>
   b.addEventListener("click", () => showTab(b.dataset.tab)));
 
 // ---- Settings ----
-const SETTING_FIELDS = { goalInput: "goal", workoutGoalInput: "workoutGoal", waterGoalInput: "waterGoal", unitSelect: "unit" };
+const SETTING_FIELDS = { goalInput: "goal", workoutGoalInput: "workoutGoal", waterGoalInput: "waterGoalL", unitSelect: "unit" };
 
 function showSettings() {
   Object.entries(SETTING_FIELDS).forEach(([id, field]) => (document.getElementById(id).value = data[field]));
@@ -640,7 +725,10 @@ const intIn = (min, max) => v => {
 };
 bindSetting("goalInput", "goal", intIn(0, 20000));
 bindSetting("workoutGoalInput", "workoutGoal", intIn(0, 14));
-bindSetting("waterGoalInput", "waterGoal", intIn(1, 30));
+bindSetting("waterGoalInput", "waterGoalL", v => {
+  const n = Math.round(Number(String(v).replace(",", ".")) * 4) / 4; // nearest 0.25 L
+  return v !== "" && Number.isFinite(n) ? Math.min(10, Math.max(0.25, n)) : null;
+});
 bindSetting("unitSelect", "unit", v => (v === "lb" ? "lb" : "kg"));
 showSettings();
 

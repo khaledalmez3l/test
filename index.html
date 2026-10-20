@@ -140,12 +140,41 @@
           <div class="card-head">
             <h2>Water · <span class="day-name"></span></h2>
           </div>
-          <div class="water-row">
-            <button type="button" class="icon-btn" id="waterMinus" aria-label="Remove a glass">−</button>
-            <div class="glasses" id="glasses"></div>
-            <button type="button" class="icon-btn" id="waterPlus" aria-label="Add a glass">+</button>
+          <div class="water-wrap">
+            <svg class="bottle" viewBox="0 0 150 220" role="img" aria-label="Water bottle">
+              <defs>
+                <clipPath id="bottleClip">
+                  <path d="M46 24H74V40C74 52 102 58 102 80V192Q102 206 88 206H32Q18 206 18 192V80C18 58 46 52 46 40Z"/>
+                </clipPath>
+              </defs>
+              <path class="bottle-glass" d="M46 24H74V40C74 52 102 58 102 80V192Q102 206 88 206H32Q18 206 18 192V80C18 58 46 52 46 40Z"/>
+              <g clip-path="url(#bottleClip)">
+                <g id="waterLevel" class="water-level">
+                  <path class="wave wave-back" d="M-120 0Q-90 -7 -60 0T0 0T60 0T120 0T180 0T240 0V240H-120Z"/>
+                  <path class="wave wave-front" d="M-120 0Q-90 -7 -60 0T0 0T60 0T120 0T180 0T240 0V240H-120Z"/>
+                </g>
+                <g id="bubbles"></g>
+              </g>
+              <path class="bottle-shine" d="M28 92V180"/>
+              <path class="bottle-outline" d="M46 24H74V40C74 52 102 58 102 80V192Q102 206 88 206H32Q18 206 18 192V80C18 58 46 52 46 40Z"/>
+              <rect class="bottle-cap" x="42" y="6" width="36" height="20" rx="5"/>
+              <g id="bottleTicks"></g>
+            </svg>
+            <div class="water-side">
+              <div class="water-amount"><span id="waterAmount">0 L</span><small> / <span id="waterGoalShow">2 L</span></small></div>
+              <p class="meta" id="waterLabel"></p>
+              <form id="waterForm" class="entry-form water-form">
+                <input type="text" id="waterInput" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" placeholder="Liters" aria-label="Liters drunk" required>
+                <button type="submit" class="primary-btn">Add</button>
+              </form>
+              <div class="water-quick">
+                <button type="button" class="chip" data-water="0.25">+250 ml</button>
+                <button type="button" class="chip" data-water="0.5">+500 ml</button>
+                <button type="button" class="chip" data-water="1">+1 L</button>
+              </div>
+              <button type="button" class="text-btn small-btn" id="waterReset" hidden>Reset</button>
+            </div>
           </div>
-          <p class="meta" id="waterLabel"></p>
 
           <div class="card-head weight-head">
             <h2>Weight</h2>
@@ -211,8 +240,8 @@
           <label>Workouts per week
             <input type="number" id="workoutGoalInput" min="0" max="14" step="1">
           </label>
-          <label>Glasses of water per day
-            <input type="number" id="waterGoalInput" min="1" max="30" step="1">
+          <label>Daily water goal (liters)
+            <input type="number" id="waterGoalInput" min="0.25" max="10" step="0.25" inputmode="decimal">
           </label>
           <label>Weight unit
             <select id="unitSelect">
