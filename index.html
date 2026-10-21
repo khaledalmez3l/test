@@ -64,7 +64,11 @@ h3{font-size:16px}
 #hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
 .hud{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
 .brand{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-weight:700;font-size:21px;margin-right:auto}
-.brand .mark{font-size:24px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.12))}
+.brand .mark{font-size:24px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.12));border:0;background:none;padding:0;cursor:pointer;line-height:1}
+.iconpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.iconpick button{aspect-ratio:1;max-width:100%;font-size:28px;border:1.5px solid var(--line);background:var(--panel2);border-radius:12px;cursor:pointer;display:grid;place-items:center}
+.iconpick button:hover{border-color:var(--leaf)}
+.iconpick button.on{border-color:var(--leaf);background:var(--leafsoft);box-shadow:inset 0 0 0 1px var(--leaf)}
 .stat{display:flex;flex-direction:column;line-height:1.15;min-width:0}
 .stat b{font-family:var(--fd);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .stat small{font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -362,6 +366,12 @@ const BOOSTS=[
   {id:'miracle',n:'Miracle Grow',e:'⚡',d:'Every planted crop is ready right now.',gems:2},
   {id:'skip',n:'Pocket Watch',e:'⏱️',d:'Skip ahead one hour of farm time instantly.',gems:12},
 ];
+const ICONS=[['🌱','Sprout'],['🌻','Sunflower'],['🥕','Carrot'],['🌾','Wheat'],['🚜','Tractor'],['🧑‍🌾','Farmer'],['🏡','Farmhouse'],['🐔','Chicken'],['🐄','Cow'],['🐝','Bee'],['🍓','Strawberry'],['🎃','Pumpkin'],['🍄','Mushroom'],['🌈','Rainbow'],['🦄','Unicorn'],['🐉','Dragon']];
+function setFavicon(){
+  let l=document.getElementById('favicon');
+  if(!l){l=document.createElement('link');l.id='favicon';l.rel='icon';document.head.appendChild(l)}
+  l.href='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="88">${S.icon||'🌱'}</text></svg>`);
+}
 const VILLAGERS=[
   ['Old Mabel','👵'],['Farmer Joe','👨‍🌾'],['Little Pip','👧'],['Chef Rosa','🧑‍🍳'],
   ['Wizard Fen','🧙'],['Captain Gale','🧔'],['Baker Tom','👨‍🍳'],['Lady Wren','👩'],['Grandpa Oak','👴'],['Sir Bramble','🤴'],
@@ -403,7 +413,7 @@ function freshRun(){
   return {coins:20,xp:0,level:1,sp:0,plots:[],inv:{},up:{},sk:{},an:{},st:[{r:null,t:0,on:false,rep:true}],orders:[],orderCd:4,runEarned:0,sel:'wheat',handCap:0};
 }
 function freshMeta(){
-  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,handOff:false,replantOff:false,replantSeed:'same',mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
+  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,icon:'🌱',handOff:false,replantOff:false,replantSeed:'same',mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
     stats:{harvest:0,earned:0,golden:0,orders:0,crafted:0,goods:0,bees:0,festivals:0,clicks:0,play:0,bestRun:0},last:Date.now(),v:1};
 }
 let S;
@@ -743,7 +753,7 @@ function renderHud(){
     return `<button class="tab${UI.tab===id?' on':''}" data-a="tab" data-v="${id}" ${locked?'disabled':''}>${n}${locked?' · Lv '+lv:''}${badge!==''?`<span class="badge">${badge}</span>`:''}</button>`;
   }).join('');
   return `<div class="hud">
-    <div class="brand"><span class="mark">🌱</span>Turnip Hollow</div>
+    <div class="brand"><button class="mark" data-a="tab" data-v="almanac" title="Change the farm icon" aria-label="Change the farm icon">${S.icon||'🌱'}</button>Turnip Hollow</div>
     <div class="stat"><b>🪙 ${fmt(S.coins)}</b><small>≈ ${fmt(S.rate)} coins/s</small></div>
     <div class="stat"><b>💎 ${fmt(S.gems)}</b><small>gems</small></div>
     ${S.seedsTotal?`<div class="stat"><b><span class="gseed"></span> ${fmt(S.seeds)}</b><small>+${fmt(10*S.seedsTotal)}% coins</small></div>`:''}
@@ -1004,6 +1014,10 @@ function renderAlmanac(){
     <div class="row spread"><h2>Farmer's Almanac</h2><span class="chip">${achCount()} / ${ACHS.length} achievements</span></div>
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
       <div class="card section" style="gap:6px"><h3>Records</h3>${stats}</div>
+      <div class="card section" style="gap:8px"><h3>Farm icon</h3>
+        <p class="mute" style="margin:0;font-size:13px">Pick the icon shown beside the farm name and on the browser tab.</p>
+        <div class="iconpick">${ICONS.map(([e,n])=>`<button class="${(S.icon||'🌱')===e?'on':''}" data-a="icon" data-v="${e}" title="${n}" aria-label="${n}">${e}</button>`).join('')}</div>
+      </div>
       <div class="card section" style="gap:8px"><h3>How the farm works</h3>
         <p class="mute" style="margin:0;font-size:13px">A day lasts 2 minutes and each season lasts 3 days. In-season crops grow 20% faster and yield 50% more; winter slows everything else down. Weather shifts every minute or two. Golden crops yield ten times as much. The farm keeps running while you are away, for up to 12 hours.</p>
         <p class="mute" style="margin:0;font-size:13px">Progress saves in this browser every few seconds.</p>
@@ -1064,6 +1078,7 @@ const ACT={
     s.r=null;s.on=false;s.t=0;
   },
   keep:v=>{S.keep=+v},
+  icon:v=>{S.icon=v;setFavicon()},
   replantSeed:v=>{S.replantSeed=v},
   toggleReplant:()=>{S.replantOff=!S.replantOff;toast(S.replantOff?'Auto-replant paused. Harvested plots stay empty for you to plant.':'Auto-replant is back on.')},
   toggleHand:()=>{S.handOff=!S.handOff;toast(S.handOff?'Farmhand paused. Ripe crops will wait for you.':'Farmhand is back to harvesting.')},
@@ -1110,7 +1125,7 @@ const ACT={
   reset:()=>{
     if(!armed('reset'))return;
     try{localStorage.removeItem(KEY)}catch(e){}
-    S=Object.assign(freshMeta(),freshRun());startRun();
+    S=Object.assign(freshMeta(),freshRun());startRun();setFavicon();
     UI.tab='fields';toast('Fresh start. Welcome to Turnip Hollow!');
   },
   closeModal:()=>{document.getElementById('modal').hidden=true},
@@ -1165,6 +1180,7 @@ function start(data){
   }
   UI.live=true;
   checkAch();
+  setFavicon();
   render();
   let last=performance.now(),acc=0,saveAcc=0;
   setInterval(()=>{
