@@ -403,7 +403,7 @@ function freshRun(){
   return {coins:20,xp:0,level:1,sp:0,plots:[],inv:{},up:{},sk:{},an:{},st:[{r:null,t:0,on:false,rep:true}],orders:[],orderCd:4,runEarned:0,sel:'wheat',handCap:0};
 }
 function freshMeta(){
-  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
+  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,handOff:false,mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
     stats:{harvest:0,earned:0,golden:0,orders:0,crafted:0,goods:0,bees:0,festivals:0,clicks:0,play:0,bestRun:0},last:Date.now(),v:1};
 }
 let S;
@@ -452,7 +452,7 @@ function goldenChance(){
   return Math.min(g,.5);
 }
 const critChance=()=>.03*U('sickle');
-const handRate=()=>.4*U('hand');
+const handRate=()=>S.handOff?0:.4*U('hand');
 const animalSpeed=()=>(1+.1*U('hay'))*(1+.08*SK('whisper'));
 const kitchenSpeed=()=>(1+.1*U('oven'))*(1+.08*SK('chef'));
 const xpMult=()=>(1+.25*P('almanac'))*(1+.05*S.seedsTotal);
@@ -789,6 +789,7 @@ function renderFields(){
       <div class="row">
         <button class="btn pri" data-a="harvestAll" ${ready?'':'disabled'}>Harvest ready (${ready})</button>
         <button class="btn" data-a="plantAll" ${empty&&S.coins>=sel.cost?'':'disabled'}>Plant ${sel.e} in ${empty} empty · 🪙${fmt(sel.cost*empty)}</button>
+        ${U('hand')?`<button class="btn ${S.handOff?'':'on'}" data-a="toggleHand">${S.handOff?'Farmhand: paused':'Farmhand: harvesting'}</button>`:''}
       </div>
     </div>
     <div class="seeds">${seeds}</div>
@@ -798,7 +799,7 @@ function renderFields(){
       <span>Yield ×${yieldMult(sel).toFixed(2)}</span>·
       <span>Golden chance ${(goldenChance()*100).toFixed(1)}%</span>·
       <span>Triple harvest ${(critChance()*100).toFixed(0)}%</span>·
-      <span>${U('hand')?`Farmhand ${fmt(handRate())}/s`:'No farmhand yet'}</span>·
+      <span>${U('hand')?(S.handOff?'Farmhand paused':`Farmhand ${fmt(handRate())}/s`):'No farmhand yet'}</span>·
       <span>${U('spreader')?'Auto-replant on':'Auto-replant: buy the Seed Spreader'}</span>
     </div>
   </div>`;
@@ -1057,6 +1058,7 @@ const ACT={
     s.r=null;s.on=false;s.t=0;
   },
   keep:v=>{S.keep=+v},
+  toggleHand:()=>{S.handOff=!S.handOff;toast(S.handOff?'Farmhand paused. Ripe crops will wait for you.':'Farmhand is back to harvesting.')},
   auto:v=>{S.auto[v]=S.auto[v]===false},
   sell:(v,e)=>{const g=sell(v,Math.floor(S.inv[v]||0));if(g)floatText(e,'+🪙'+fmt(g),true)},
   sellAll:(v,e)=>{let g=0;for(const id in S.inv)g+=sell(id,Math.floor(S.inv[id]));if(g)floatText(e,'+🪙'+fmt(g),true)},
@@ -1133,7 +1135,7 @@ function welcomeBack(secs,coins,xpLv){
     <h2>Your farm kept working for ${fmtT(secs)}</h2>
     <div class="kv"><span>Coins earned</span><span>🪙 ${fmt(coins)}</span></div>
     ${xpLv?`<div class="kv"><span>Levels gained</span><span>+${xpLv}</span></div>`:''}
-    <p class="mute" style="margin:0;font-size:13px">${U('hand')?'Your farmhands harvested while you were gone.':'Hire a farmhand in Upgrades so crops get harvested while you are away.'}</p>
+    <p class="mute" style="margin:0;font-size:13px">${U('hand')&&S.handOff?'Your farmhand is paused, so nothing was harvested.':U('hand')?'Your farmhands harvested while you were gone.':'Hire a farmhand in Upgrades so crops get harvested while you are away.'}</p>
     <button class="btn pri" data-a="closeModal">Back to the farm</button>
   </div>`;
   m.hidden=false;
