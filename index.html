@@ -403,7 +403,7 @@ function freshRun(){
   return {coins:20,xp:0,level:1,sp:0,plots:[],inv:{},up:{},sk:{},an:{},st:[{r:null,t:0,on:false,rep:true}],orders:[],orderCd:4,runEarned:0,sel:'wheat',handCap:0};
 }
 function freshMeta(){
-  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,handOff:false,mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
+  return {gems:5,seeds:0,seedsTotal:0,pup:{},ach:{},auto:{},keep:25,handOff:false,replantOff:false,mkt:{},mktPrev:{},hot:null,mktT:60,clock:0,weather:'sunny',wT:90,boosts:{},beeT:45,rate:0,rateAcc:0,rateT:0,
     stats:{harvest:0,earned:0,golden:0,orders:0,crafted:0,goods:0,bees:0,festivals:0,clicks:0,play:0,bestRun:0},last:Date.now(),v:1};
 }
 let S;
@@ -510,7 +510,7 @@ function harvest(i,manual,ev){
   p.c=null;p.t=0;p.g=false;
   if(manual&&ev)floatText(ev,`+${fmt(q)} ${c.e}${crit?' ×3':''}`,gold||crit);
   if(gold&&manual===false&&UI.live)toast(`A golden ${c.n.toLowerCase()} gave ${fmt(q)}!`,'gold');
-  if(U('spreader'))plant(i,c.id);
+  if(U('spreader')&&!S.replantOff)plant(i,c.id);
 }
 function feedAndProduce(a,st){
   let can=st.n;
@@ -790,6 +790,7 @@ function renderFields(){
         <button class="btn pri" data-a="harvestAll" ${ready?'':'disabled'}>Harvest ready (${ready})</button>
         <button class="btn" data-a="plantAll" ${empty&&S.coins>=sel.cost?'':'disabled'}>Plant ${sel.e} in ${empty} empty · 🪙${fmt(sel.cost*empty)}</button>
         ${U('hand')?`<button class="btn ${S.handOff?'':'on'}" data-a="toggleHand">${S.handOff?'Farmhand: paused':'Farmhand: harvesting'}</button>`:''}
+        ${U('spreader')?`<button class="btn ${S.replantOff?'':'on'}" data-a="toggleReplant">${S.replantOff?'Auto-replant: paused':'Auto-replant: on'}</button>`:''}
       </div>
     </div>
     <div class="seeds">${seeds}</div>
@@ -800,7 +801,7 @@ function renderFields(){
       <span>Golden chance ${(goldenChance()*100).toFixed(1)}%</span>·
       <span>Triple harvest ${(critChance()*100).toFixed(0)}%</span>·
       <span>${U('hand')?(S.handOff?'Farmhand paused':`Farmhand ${fmt(handRate())}/s`):'No farmhand yet'}</span>·
-      <span>${U('spreader')?'Auto-replant on':'Auto-replant: buy the Seed Spreader'}</span>
+      <span>${U('spreader')?(S.replantOff?'Auto-replant paused':'Auto-replant on'):'Auto-replant: buy the Seed Spreader'}</span>
     </div>
   </div>`;
 }
@@ -1058,6 +1059,7 @@ const ACT={
     s.r=null;s.on=false;s.t=0;
   },
   keep:v=>{S.keep=+v},
+  toggleReplant:()=>{S.replantOff=!S.replantOff;toast(S.replantOff?'Auto-replant paused. Harvested plots stay empty for you to plant.':'Auto-replant is back on.')},
   toggleHand:()=>{S.handOff=!S.handOff;toast(S.handOff?'Farmhand paused. Ripe crops will wait for you.':'Farmhand is back to harvesting.')},
   auto:v=>{S.auto[v]=S.auto[v]===false},
   sell:(v,e)=>{const g=sell(v,Math.floor(S.inv[v]||0));if(g)floatText(e,'+🪙'+fmt(g),true)},
